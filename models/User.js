@@ -19,6 +19,7 @@ const UserSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now,
+    required: true,
   },
   isActive: {
     type: Boolean,
@@ -30,6 +31,7 @@ const UserSchema = new mongoose.Schema({
   },
   birthDate: {
     type: Date,
+    required: true,
   },
 });
 
