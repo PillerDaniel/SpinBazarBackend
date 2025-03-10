@@ -20,6 +20,17 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
+  role: {
+    type: String,
+    default: "user",
+  },
+  birthDate: {
+    type: Date,
+  },
 });
 
 var User = mongoose.model("User", UserSchema);
