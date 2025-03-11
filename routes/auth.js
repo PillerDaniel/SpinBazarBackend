@@ -14,15 +14,16 @@ router.post(
   "/register",
   [
     //validation
-    body("userName").notEmpty().withMessage("Username is required"),
-    body("email").isEmail().withMessage("Invalid email"),
+    body("userName").notEmpty().withMessage("Username is required."),
+    body("email").isEmail().withMessage("Invalid email."),
     body("password")
       .isLength({ min: 8 })
-      .withMessage("Password must be at least 8 characters")
+      .withMessage("Password must be at least 8 characters.")
       .matches(/[A-Z]/)
-      .withMessage("Password must contain at least one uppercase letter")
+      .withMessage("Password must contain at least one uppercase letter.")
       .matches(/\d/)
-      .withMessage("Password must contain at least one number"),
+      .withMessage("Password must contain at least one number."),
+    body("birthDate").notEmpty().withMessage("Birthdate is required."),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -41,11 +42,22 @@ router.post(
       if (existingUser) {
         return res
           .status(400)
-          .json({ message: "Username or Email already in use" });
+          .json({ message: "Username or Email already in use." });
       }
 
       if (password !== passwordConfirmation) {
-        return res.status(400).json({ message: "Passwords do not match" });
+        return res.status(400).json({ message: "Passwords do not match." });
+      }
+
+      const age = Math.abs(
+        new Date(Date.now() - new Date(birthDate).getTime()).getUTCFullYear() -
+          1970
+      );
+      //age check
+      if (age < 18) {
+        return res
+          .status(400)
+          .json({ message: "You must be at least 18 years old to register." });
       }
 
       // pw hash
@@ -70,10 +82,9 @@ router.post(
         }
       );
 
-      res.status(201).json({ message: "User Created", token: jwtData });
+      return res.status(201).json({ message: "User Created.", token: jwtData });
     } catch (err) {
-      console.log(err);
-      res.status(500).json({ message: "Internal server error" });
+      return res.status(500).json({ message: "Internal server error." });
     }
   }
 );
@@ -89,7 +100,7 @@ router.post("/login", async (req, res) => {
 
     // if user doesn't exist
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "invalid credentials." });
     }
 
     // check pw
@@ -97,7 +108,13 @@ router.post("/login", async (req, res) => {
 
     //if pw doesn't match
     if (!isMatch) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "Invalid credentials." });
+    }
+
+    if (user.isActive === false) {
+      return res.status(401).json({
+        message: "Your account is suspended, contact with our support.",
+      });
     }
 
     const jwtData = jwt.sign(
@@ -108,9 +125,11 @@ router.post("/login", async (req, res) => {
       }
     );
 
-    res.status(200).json({ message: "Logged in successfully", token: jwtData });
+    return res
+      .status(200)
+      .json({ message: "Logged in successfully.", token: jwtData });
   } catch (err) {
-    res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error." });
   }
 });
 
