@@ -3,10 +3,12 @@ const bcrypt = require("bcryptjs");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const Wallet = require("../models/Wallet");
 const config = require("config");
 const jwtSecret = config.get("jwtSecret");
 const { body, validationResult } = require("express-validator");
-
+//ranom address generator
+const generateRandomAddress = require("../config/randomAddresGenerator");
 // Register
 // /auth/register
 
@@ -70,8 +72,16 @@ router.post(
         email,
         birthDate,
       });
-
       await user.save();
+
+      //wallet for the user
+      const wallet = new Wallet({
+        user: user._id,
+        usdtAddress: generateRandomAddress(34),
+        ltcAddress: generateRandomAddress(34),
+        btcAddress: generateRandomAddress(34),
+      });
+      await wallet.save();
 
       // jwt token
       const jwtData = jwt.sign(
@@ -82,8 +92,12 @@ router.post(
         }
       );
 
-      return res.status(201).json({ message: "User Created.", token: jwtData });
+      return res
+        .status(201)
+        .json({ message: "User Created.", token: jwtData, wallet: wallet });
     } catch (err) {
+      console.log(err);
+      console.log("sadada");
       return res.status(500).json({ message: "Internal server error." });
     }
   }
@@ -97,6 +111,8 @@ router.post("/login", async (req, res) => {
 
   try {
     const user = await User.findOne({ userName });
+    const wallet = await Wallet.findOne({ user: user._id });
+    console.log(wallet);
 
     // if user doesn't exist
     if (!user) {
@@ -125,9 +141,11 @@ router.post("/login", async (req, res) => {
       }
     );
 
-    return res
-      .status(200)
-      .json({ message: "Logged in successfully.", token: jwtData });
+    return res.status(200).json({
+      message: "Logged in successfully.",
+      token: jwtData,
+      wallet: wallet,
+    });
   } catch (err) {
     return res.status(500).json({ message: "Internal server error." });
   }
