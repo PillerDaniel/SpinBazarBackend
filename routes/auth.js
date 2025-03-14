@@ -1,17 +1,24 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
-const router = express.Router();
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const Wallet = require("../models/Wallet");
 const config = require("config");
-const jwtSecret = config.get("jwtSecret");
 const { body, validationResult } = require("express-validator");
-//ranom address generator
+const cookieParser = require("cookie-parser");
+//random address generator
 const generateRandomAddress = require("../config/randomAddresGenerator");
+
+const jwtSecret = config.get("jwtSecret");
+const refreshSecret = config.get("refreshSecret");
+
+const activeRefreshTokens = new Set();
+
+const router = express.Router();
+router.use(cookieParser());
+
 // Register
 // /auth/register
-
 router.post(
   "/register",
   [
@@ -83,21 +90,38 @@ router.post(
       });
       await wallet.save();
 
-      // jwt token
+      // jwt token 30min
       const jwtData = jwt.sign(
         { user: { id: user.id, userName: user.userName } },
         jwtSecret,
         {
-          expiresIn: 3600,
+          expiresIn: 1800,
+        }
+      );
+      //refresh token 3h
+      const refreshToken = jwt.sign(
+        { user: { id: user.id, userName: user.userName } },
+        refreshSecret,
+        {
+          expiresIn: 10800,
         }
       );
 
-      return res
-        .status(201)
-        .json({ message: "User Created.", token: jwtData, wallet: wallet });
+      //save refresh token
+      activeRefreshTokens.add(refreshToken);
+
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "Strict",
+        maxAge: 3 * 60 * 60 * 1000,
+      });
+      return res.status(201).json({
+        message: "Succesful registration.",
+        token: jwtData,
+        wallet: wallet,
+      });
     } catch (err) {
-      console.log(err);
-      console.log("sadada");
       return res.status(500).json({ message: "Internal server error." });
     }
   }
@@ -133,6 +157,7 @@ router.post("/login", async (req, res) => {
       });
     }
 
+    // acces token
     const jwtData = jwt.sign(
       { user: { id: user.id, userName: user.userName } },
       jwtSecret,
@@ -141,6 +166,25 @@ router.post("/login", async (req, res) => {
       }
     );
 
+    //refresh token
+    const refreshToken = jwt.sign(
+      { user: { id: user.id, userName: user.userName } },
+      refreshSecret,
+      {
+        expiresIn: 10800,
+      }
+    );
+    console.log(refreshToken);
+
+    activeRefreshTokens.add(refreshToken);
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "Strict",
+      maxAge: 3 * 60 * 60 * 1000,
+    });
+
     return res.status(200).json({
       message: "Logged in successfully.",
       token: jwtData,
@@ -148,6 +192,68 @@ router.post("/login", async (req, res) => {
     });
   } catch (err) {
     return res.status(500).json({ message: "Internal server error." });
+  }
+});
+
+// Refresh route
+// /auth/refresh
+router.post("/refresh", async (req, res) => {
+  const oldRefreshToken = req.cookies.refreshToken;
+  if (!oldRefreshToken) {
+    return res.status(401).json({ message: "No refresh token provided." });
+  }
+
+  if (!activeRefreshTokens.has(oldRefreshToken)) {
+    return res
+      .status(403)
+      .json({ message: "Token has been already used or expired." });
+  }
+
+  jwt.verify(oldRefreshToken, refreshSecret, (err, user) => {
+    if (err) {
+      return res.status(403).json({ message: "Invalid or expired token." });
+    }
+
+    activeRefreshTokens.delete(oldRefreshToken);
+
+    const newAccesToken = jwt.sign(
+      { user: { id: user.id, userName: user.userName } },
+      jwtSecret,
+      {
+        expiresIn: 1800,
+      }
+    );
+
+    const refreshToken = jwt.sign(
+      { user: { id: user.id, userName: user.userName } },
+      refreshSecret,
+      {
+        expiresIn: 10800,
+      }
+    );
+
+    activeRefreshTokens.add(refreshToken);
+    //update refres token cookie
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "Strict",
+      maxAge: 3 * 60 * 60 * 1000,
+    });
+
+    res.status(200).json({ token: newAccesToken });
+  });
+});
+
+// Logout
+// /auth/logout
+
+router.post("/logout", async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+  if (refreshToken) {
+    activeRefreshTokens.delete(refreshToken);
+    res.clearCookie("refreshToken");
+    return res.status(200).json({ message: "Logged out successfully." });
   }
 });
 
