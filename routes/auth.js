@@ -136,7 +136,6 @@ router.post("/login", async (req, res) => {
   try {
     const user = await User.findOne({ userName });
     const wallet = await Wallet.findOne({ user: user._id });
-    console.log(wallet);
 
     // if user doesn't exist
     if (!user) {
@@ -174,7 +173,6 @@ router.post("/login", async (req, res) => {
         expiresIn: 10800,
       }
     );
-    console.log(refreshToken);
 
     activeRefreshTokens.add(refreshToken);
 
@@ -209,15 +207,21 @@ router.post("/refresh", async (req, res) => {
       .json({ message: "Token has been already used or expired." });
   }
 
-  jwt.verify(oldRefreshToken, refreshSecret, (err, user) => {
+  jwt.verify(oldRefreshToken, refreshSecret, (err, decodedToken) => {
     if (err) {
       return res.status(403).json({ message: "Invalid or expired token." });
     }
 
+    res.clearCookie("refreshToken");
     activeRefreshTokens.delete(oldRefreshToken);
 
     const newAccesToken = jwt.sign(
-      { user: { id: user.id, userName: user.userName } },
+      {
+        user: {
+          id: decodedToken.user.id,
+          userName: decodedToken.user.userName,
+        },
+      },
       jwtSecret,
       {
         expiresIn: 1800,
@@ -225,7 +229,12 @@ router.post("/refresh", async (req, res) => {
     );
 
     const refreshToken = jwt.sign(
-      { user: { id: user.id, userName: user.userName } },
+      {
+        user: {
+          id: decodedToken.user.id,
+          userName: decodedToken.user.userName,
+        },
+      },
       refreshSecret,
       {
         expiresIn: 10800,
@@ -233,7 +242,7 @@ router.post("/refresh", async (req, res) => {
     );
 
     activeRefreshTokens.add(refreshToken);
-    //update refres token cookie
+    //update refresh token cookie
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: true,
