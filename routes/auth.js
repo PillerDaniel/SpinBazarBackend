@@ -8,6 +8,7 @@ const { body, validationResult } = require("express-validator");
 const cookieParser = require("cookie-parser");
 //random address generator
 const generateRandomAddress = require("../config/randomAddresGenerator");
+const authMiddleware = require("../middleware/authMiddleware");
 
 const jwtSecret = config.get("jwtSecret");
 const refreshSecret = config.get("refreshSecret");
@@ -264,6 +265,11 @@ router.post("/logout", async (req, res) => {
     res.clearCookie("refreshToken");
     return res.status(200).json({ message: "Logged out successfully." });
   }
+});
+
+router.post("/test", authMiddleware, async (req, res) => {
+  console.log(req.user);
+  return res.status(200).json({ message: "test route." });
 });
 
 module.exports = router;
