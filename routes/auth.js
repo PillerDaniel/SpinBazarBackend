@@ -136,12 +136,12 @@ router.post("/login", async (req, res) => {
 
   try {
     const user = await User.findOne({ userName });
-    const wallet = await Wallet.findOne({ user: user._id });
 
-    // if user doesn't exist
     if (!user) {
       return res.status(404).json({ message: "invalid credentials." });
     }
+
+    const wallet = await Wallet.findOne({ user: user._id });
 
     // check pw
     const isMatch = await bcrypt.compare(password, user.password);
@@ -190,6 +190,7 @@ router.post("/login", async (req, res) => {
       wallet: wallet,
     });
   } catch (err) {
+    console.log(err);
     return res.status(500).json({ message: "Internal server error." });
   }
 });
