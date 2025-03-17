@@ -86,7 +86,7 @@ router.post(
 
       // jwt token 30min
       const jwtData = jwt.sign(
-        { user: { id: user.id, userName: user.userName } },
+        { user: { id: user.id, userName: user.userName, wallet: wallet } },
         jwtSecret,
         {
           expiresIn: 1800,
@@ -113,7 +113,6 @@ router.post(
       return res.status(201).json({
         message: "Succesful registration.",
         token: jwtData,
-        wallet: wallet,
       });
     } catch (err) {
       return res.status(500).json({ message: "Internal server error." });
@@ -152,7 +151,7 @@ router.post("/login", async (req, res) => {
 
     // acces token
     const jwtData = jwt.sign(
-      { user: { id: user.id, userName: user.userName } },
+      { user: { id: user.id, userName: user.userName, wallet: wallet } },
       jwtSecret,
       {
         expiresIn: 3600,
@@ -210,12 +209,15 @@ router.post("/refresh", async (req, res) => {
     res.clearCookie("refreshToken");
     activeRefreshTokens.delete(oldRefreshToken);
 
+    const wallet = Wallet.findOne({ user: decodedToken.user.id });
+
     const newAccesToken = jwt.sign(
       {
         user: {
           id: decodedToken.user.id,
           userName: decodedToken.user.userName,
         },
+        wallet: wallet,
       },
       jwtSecret,
       {
