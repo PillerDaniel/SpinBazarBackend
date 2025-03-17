@@ -6,9 +6,8 @@ const Wallet = require("../models/Wallet");
 const config = require("config");
 const { body, validationResult } = require("express-validator");
 const cookieParser = require("cookie-parser");
-//random address generator
-const generateRandomAddress = require("../config/randomAddresGenerator");
 const authMiddleware = require("../middleware/authMiddleware");
+const generateUniqueWallet = require("../config/generateUniqueWallet");
 
 const jwtSecret = config.get("jwtSecret");
 const refreshSecret = config.get("refreshSecret");
@@ -83,13 +82,7 @@ router.post(
       await user.save();
 
       //wallet for the user
-      const wallet = new Wallet({
-        user: user._id,
-        usdtAddress: generateRandomAddress(34),
-        ltcAddress: generateRandomAddress(34),
-        btcAddress: generateRandomAddress(34),
-      });
-      await wallet.save();
+      wallet = await generateUniqueWallet(user._id);
 
       // jwt token 30min
       const jwtData = jwt.sign(
