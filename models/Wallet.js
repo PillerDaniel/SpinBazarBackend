@@ -11,6 +11,7 @@ const WalletSchema = new mongoose.Schema({
   balance: {
     type: Number,
     default: 0,
+    set: (value) => parseFloat(value.toFixed(2)),
   },
   usdtAddress: {
     type: String,
