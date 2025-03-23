@@ -5,6 +5,7 @@ const connectDB = require("./config/db");
 const authRouter = require("./routes/auth");
 const betRouter = require("./routes/bet");
 const historyRouter = require("./routes/history");
+const adminRouter = require("./routes/admin");
 const cookieParser = require("cookie-parser");
 
 connectDB();
@@ -24,6 +25,7 @@ app.use(cookieParser());
 app.use("/auth", authRouter);
 app.use("/bet", betRouter);
 app.use("/history", historyRouter);
+app.use("/admin", adminRouter);
 
 app.get("/", (req, res) => {
   res.send("Api running");

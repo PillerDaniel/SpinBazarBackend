@@ -6,7 +6,6 @@ const Wallet = require("../models/Wallet");
 const config = require("config");
 const { body, validationResult } = require("express-validator");
 const cookieParser = require("cookie-parser");
-const authMiddleware = require("../middleware/authMiddleware");
 const generateUniqueWallet = require("../config/generateUniqueWallet");
 
 const jwtSecret = config.get("jwtSecret");
@@ -86,7 +85,14 @@ router.post(
 
       // jwt token 30min
       const jwtData = jwt.sign(
-        { user: { id: user.id, userName: user.userName, wallet: wallet } },
+        {
+          user: {
+            id: user.id,
+            userName: user.userName,
+            role: user.role,
+            wallet: wallet,
+          },
+        },
         jwtSecret,
         {
           expiresIn: 1800,
@@ -94,7 +100,7 @@ router.post(
       );
       //refresh token 3h
       const refreshToken = jwt.sign(
-        { user: { id: user.id, userName: user.userName } },
+        { user: { id: user.id, userName: user.userName, role: user.role } },
         refreshSecret,
         {
           expiresIn: 10800,
@@ -151,7 +157,14 @@ router.post("/login", async (req, res) => {
 
     // acces token
     const jwtData = jwt.sign(
-      { user: { id: user.id, userName: user.userName, wallet: wallet } },
+      {
+        user: {
+          id: user.id,
+          userName: user.userName,
+          role: user.role,
+          wallet: wallet,
+        },
+      },
       jwtSecret,
       {
         expiresIn: 3600,
@@ -160,7 +173,7 @@ router.post("/login", async (req, res) => {
 
     //refresh token
     const refreshToken = jwt.sign(
-      { user: { id: user.id, userName: user.userName } },
+      { user: { id: user.id, userName: user.userName, role: user.role } },
       refreshSecret,
       {
         expiresIn: 10800,
@@ -179,7 +192,6 @@ router.post("/login", async (req, res) => {
     return res.status(200).json({
       message: "Logged in successfully.",
       token: jwtData,
-      wallet: wallet,
     });
   } catch (err) {
     console.log(err);
@@ -216,8 +228,9 @@ router.post("/refresh", async (req, res) => {
         user: {
           id: decodedToken.user.id,
           userName: decodedToken.user.userName,
+          wallet: wallet,
+          role: decodedToken.user.role,
         },
-        wallet: wallet,
       },
       jwtSecret,
       {
@@ -230,6 +243,7 @@ router.post("/refresh", async (req, res) => {
         user: {
           id: decodedToken.user.id,
           userName: decodedToken.user.userName,
+          role: decodedToken.user.role,
         },
       },
       refreshSecret,
@@ -261,11 +275,6 @@ router.post("/logout", async (req, res) => {
     res.clearCookie("refreshToken");
     return res.status(200).json({ message: "Logged out successfully." });
   }
-});
-
-router.post("/test", authMiddleware, async (req, res) => {
-  console.log(req.user);
-  return res.status(200).json({ message: "test route." });
 });
 
 module.exports = router;
