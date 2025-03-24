@@ -18,7 +18,6 @@ router.get("/getusers", adminMiddleware, async (req, res) => {
 
     return res.status(200).json({ users: users });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ message: "Internal server error." });
   }
 });

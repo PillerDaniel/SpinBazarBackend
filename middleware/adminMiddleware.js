@@ -19,7 +19,6 @@ const adminMiddleware = (req, res, next) => {
     }
 
     if (decodedToken.user.role !== "admin") {
-      console.log(decodedToken.user);
       return res.status(401).json({ message: "Acces denied." });
     }
 

@@ -194,7 +194,6 @@ router.post("/login", async (req, res) => {
       token: jwtData,
     });
   } catch (err) {
-    console.log(err);
     return res.status(500).json({ message: "Internal server error." });
   }
 });
