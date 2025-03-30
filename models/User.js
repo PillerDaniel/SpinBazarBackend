@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-//User model
+// User model
 const UserSchema = new mongoose.Schema({
   userName: {
     type: String,
@@ -35,6 +35,16 @@ const UserSchema = new mongoose.Schema({
   },
 });
 
-var User = mongoose.model("User", UserSchema);
+UserSchema.virtual("wallet", {
+  ref: "Wallet",
+  localField: "_id",
+  foreignField: "user",
+  justOne: true,
+});
+
+UserSchema.set("toJSON", { virtuals: true });
+UserSchema.set("toObject", { virtuals: true });
+
+const User = mongoose.model("User", UserSchema);
 
 module.exports = User;
