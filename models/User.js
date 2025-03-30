@@ -33,6 +33,14 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
+  xp: {
+    type: Number,
+    default: 0,
+  },
+  vipStatus: {
+    type: String,
+    default: "none",
+  },
 });
 
 UserSchema.virtual("wallet", {
