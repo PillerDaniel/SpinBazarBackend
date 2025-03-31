@@ -45,7 +45,7 @@ router.get("/event", authMiddlewareForSSE, async (req, res) => {
       const uData = {
         id: user.id,
         xp: user.xp,
-        wallet: user.wallet,
+        balance: user.wallet.balance,
       };
 
       const message = {
