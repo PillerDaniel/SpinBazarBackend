@@ -72,4 +72,47 @@ router.put("/activateuser/:id", adminMiddleware, async (req, res) => {
   }
 });
 
+//edit user
+// admin/edituser/:id
+
+router.put("/edituser/:id", adminMiddleware, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { userName, email, role } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    if (user.role === "admin") {
+      return res.status(400).json({ message: "Cannot edit an admin." });
+    }
+
+    if (userName && userName !== user.userName) {
+      const existingUser = await User.findOne({ userName });
+      if (existingUser) {
+        return res.status(400).json({ message: "Username already taken." });
+      }
+    }
+
+    if (email && email !== user.email) {
+      const existingEmail = await User.findOne({ email });
+      if (existingEmail) {
+        return res.status(400).json({ message: "Email already in use." });
+      }
+    }
+
+    user.userName = userName || user.userName;
+    user.email = email || user.email;
+    user.role = role || user.role;
+
+    await user.save();
+
+    return res.json({ message: "User updated successfully." });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error." });
+  }
+});
+
 module.exports = router;
