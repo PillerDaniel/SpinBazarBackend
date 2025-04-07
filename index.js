@@ -7,6 +7,8 @@ const betRouter = require("./routes/bet");
 const historyRouter = require("./routes/history");
 const adminRouter = require("./routes/admin");
 const userRouter = require("./routes/user");
+const paymentsRouter = require("./routes/payments");
+const bonusRouter = require("./routes/bonus");
 const cookieParser = require("cookie-parser");
 
 connectDB();
@@ -29,6 +31,8 @@ app.use("/bet", betRouter);
 app.use("/history", historyRouter);
 app.use("/admin", adminRouter);
 app.use("/user", userRouter);
+app.use("/payments", paymentsRouter);
+app.use("/bonus", bonusRouter);
 
 app.get("/", (req, res) => {
   res.send("Api running");

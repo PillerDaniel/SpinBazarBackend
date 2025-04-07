@@ -28,6 +28,10 @@ const WalletSchema = new mongoose.Schema({
     default: "",
     unique: true,
   },
+  dailyBonusClaimed: {
+    type: Date,
+    default: () => new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+  },
 });
 
 module.exports = mongoose.model("Wallet", WalletSchema);
