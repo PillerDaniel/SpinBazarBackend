@@ -41,6 +41,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: "none",
   },
+  lastLogin: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 UserSchema.virtual("wallet", {

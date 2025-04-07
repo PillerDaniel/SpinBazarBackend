@@ -155,6 +155,9 @@ router.post("/login", async (req, res) => {
       });
     }
 
+    user.lastLogin = Date.now();
+    await user.save();
+
     // acces token
     const jwtData = jwt.sign(
       {
