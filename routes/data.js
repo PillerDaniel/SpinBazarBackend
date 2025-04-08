@@ -14,6 +14,7 @@ router.get("/userdata", authMiddleware, async (req, res) => {
     const userDto = {
       username: user.userName,
       xp: user.xp,
+      role: user.role,
       wallet: user.wallet,
     };
     res.status(200).json({ user: userDto });
