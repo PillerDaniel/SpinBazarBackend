@@ -22,9 +22,6 @@ const authMiddleware = async (req, res, next) => {
 
     try {
       const user = await User.findById(decodedToken.user.id).select(" -__v");
-
-      console.log(user);
-
       req.user = user;
 
       // if an admin suspend a user when the user is playing
