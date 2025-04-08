@@ -95,15 +95,15 @@ router.post(
         },
         jwtSecret,
         {
-          expiresIn: 1800,
+          expiresIn: "30m",
         }
       );
-      //refresh token 3h
+      //refresh token 7 days
       const refreshToken = jwt.sign(
         { user: { id: user.id, userName: user.userName, role: user.role } },
         refreshSecret,
         {
-          expiresIn: 10800,
+          expiresIn: "7d",
         }
       );
 
