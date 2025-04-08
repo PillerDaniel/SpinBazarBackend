@@ -11,6 +11,7 @@ const router = express.Router();
 router.get("/getusers", adminMiddleware, async (req, res) => {
   try {
     const users = await User.find({}).select("-password -__v");
+    console.log("users", users);
 
     if (!users) {
       return res.status(400).json({ message: "No users found." });
