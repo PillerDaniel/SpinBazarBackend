@@ -16,7 +16,7 @@ connectDB();
 
 // CORS
 const corsOptions = {
-  origin: "http://localhost:5173",
+  origin: "http://localhost:5174",
   methods: ["GET", "POST", "PUT"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
@@ -27,19 +27,19 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Routes
-app.use("/auth", authRouter);
-app.use("/bet", betRouter);
-app.use("/history", historyRouter);
-app.use("/admin", adminRouter);
-app.use("/user", userRouter);
-app.use("/payments", paymentsRouter);
-app.use("/bonus", bonusRouter);
-app.use("/data", dataRouter);
+app.use("/api/auth", authRouter);
+app.use("/api/bet", betRouter);
+app.use("/api/history", historyRouter);
+app.use("/api/admin", adminRouter);
+app.use("/api/user", userRouter);
+app.use("/api/payments", paymentsRouter);
+app.use("/api/bonus", bonusRouter);
+app.use("/api/data", dataRouter);
 
 app.get("/", (req, res) => {
   res.send("Api running");
 });
 
-app.listen(5001, () => {
-  console.log("Server is running on port 5001");
+app.listen(5051, "0.0.0.0", () => {
+  console.log("Server is running on port 5051");
 });

@@ -15,8 +15,6 @@ router.get("/account", authMiddleware, async (req, res) => {
     const user = req.user;
     await user.populate("wallet", "-__v");
 
-    console.log("useraccount:", user);
-
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
