@@ -50,14 +50,9 @@ router.put(
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-
-    const { oldPassword, newPassword } = req.body;
-    console.log("oldPassword", oldPassword);
-    console.log("newPassword", newPassword);
-
     try {
-      const userId = req.user;
-      const user = await User.findById(userId).select("-__v");
+      const { oldPassword, newPassword } = req.body;
+      const user = req.user;
       if (!user) {
         return res.status(404).json({ message: "User not found." });
       }
@@ -95,22 +90,59 @@ router.put(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { newEmail } = req.body;
-
     try {
+      const { newEmail, password } = req.body;
       const user = req.user;
       if (!user) {
         return res.status(404).json({ message: "User not found." });
+      }
+
+      if (!password) {
+        return res.status(400).json({ message: "Password is required." });
+      }
+
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(401).json({ message: "Password doesn't match." });
       }
 
       user.email = newEmail;
       await user.save();
       return res.status(200).json({ message: "Email changed successfully." });
     } catch (error) {
+      console.log(error);
       return res.status(500).json({ message: "Internal server error." });
     }
   }
 );
+
+// user/deactivate
+router.put("/deactivate", authMiddleware, async (req, res) => {
+  try {
+    const user = req.user;
+    const { password } = req.body;
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+    if (!password) {
+      return res.status(400).json({ message: "Password is required." });
+    }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Password doesn't match." });
+    }
+
+    user.isActive = false;
+
+    await user.save();
+    return res
+      .status(200)
+      .json({ message: "Account deactivated successfully." });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error." });
+  }
+});
 
 //sse
 router.get("/event", authMiddlewareForSSE, async (req, res) => {
