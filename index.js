@@ -12,6 +12,8 @@ const dataRouter = require("./routes/data");
 const bonusRouter = require("./routes/bonus");
 const cookieParser = require("cookie-parser");
 
+const originMiddleware = require("./middleware/originMiddleware");
+
 connectDB();
 
 // CORS
@@ -25,6 +27,10 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
+
+// Origin Middleware
+// Runs before all request
+//app.use(originMiddleware);
 
 // Routes
 app.use("/api/auth", authRouter);
