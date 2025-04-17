@@ -11,9 +11,9 @@ router.use(cookieParser());
 router.post("/placebet", authMiddleware, async (req, res) => {
   try {
     const { betAmount } = req.body;
-    const userId = req.user.id;
+    const user = req.user;
 
-    wallet = await Wallet.findOne({ user: userId });
+    wallet = await Wallet.findOne({ user: user.id });
 
     if (!wallet) {
       return res
@@ -27,6 +27,16 @@ router.post("/placebet", authMiddleware, async (req, res) => {
 
     wallet.balance -= betAmount;
     await wallet.save();
+
+    if (betAmount < 50) {
+      user.xp += 20;
+    } else if (betAmount > 50 && betAmount <= 250) {
+      user.xp += 50;
+    } else if (betAmount > 250 && betAmount <= 500) {
+      user.xp += 100;
+    }
+
+    await user.save();
 
     return res.json({ message: "Bet placed successfully.", wallet: wallet });
   } catch (error) {

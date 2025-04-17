@@ -9,7 +9,7 @@ const originMiddleware = (req, res, next) => {
   ) {
     return res
       .status(403)
-      .json({ message: `Access denied: Invalid origin. ${origin} ` });
+      .json({ message: `Access denied: Invalid origin [${origin}]. ` });
   }
 
   next();

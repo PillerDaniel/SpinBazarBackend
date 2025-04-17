@@ -51,7 +51,8 @@ router.put(
       return res.status(400).json({ errors: errors.array() });
     }
     try {
-      const { oldPassword, newPassword } = req.body;
+      console.log("req.body", req.body);
+      const { oldPassword, newPassword, newPasswordConfirmation } = req.body;
       const user = req.user;
       if (!user) {
         return res.status(404).json({ message: "User not found." });
@@ -62,10 +63,12 @@ router.put(
       if (!isMatch) {
         return res.status(401).json({ message: "Old password doesn't match." });
       }
+      if (newPassword !== newPasswordConfirmation) {
+        return res.status(400).json({ message: "New passwords do not match." });
+      }
 
       const salt = await bcrypt.genSalt(10);
       const hashedNewPassword = await bcrypt.hash(newPassword, salt);
-      console.log("hashedNewPassword", hashedNewPassword);
 
       user.password = hashedNewPassword;
       await user.save();
@@ -73,7 +76,6 @@ router.put(
         .status(200)
         .json({ message: "Password changed successfully." });
     } catch (error) {
-      console.log("error", error);
       return res.status(500).json({ message: "Internal server error." });
     }
   }
@@ -110,7 +112,6 @@ router.put(
       await user.save();
       return res.status(200).json({ message: "Email changed successfully." });
     } catch (error) {
-      console.log(error);
       return res.status(500).json({ message: "Internal server error." });
     }
   }
