@@ -38,7 +38,11 @@ router.post("/placebet", authMiddleware, async (req, res) => {
 
     await user.save();
 
-    return res.json({ message: "Bet placed successfully.", wallet: wallet });
+    return res.json({
+      message: "Bet placed successfully.",
+      wallet: wallet,
+      userXp: user.xp,
+    });
   } catch (error) {
     return res.status(500).json({ message: "Internal server error." });
   }
