@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const Payment = require("../models/Payment");
 const express = require("express");
 const authMiddleware = require("../middleware/authMiddleware");
 const authMiddlewareForSSE = require("../middleware/authMiddlewareForSSE");
@@ -12,18 +13,21 @@ const router = express.Router();
 
 router.get("/account", authMiddleware, async (req, res) => {
   try {
-    const user = req.user;
-    await user.populate("wallet", "-__v");
+    const user = await User.findById(req.user.id)
+      .select("-password -__v")
+      .populate("wallet", "-__v");
 
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
 
-    if (!user.isActive) {
-      return res.status(400).json({ message: "User is suspended." });
-    }
+    const transactions = await Payment.find({ user: user.id })
+      .select("-__v -user -cardType -last4Digits")
+      .sort({
+        createdAt: -1,
+      });
 
-    return res.status(200).json({ userData: user });
+    return res.status(200).json({ userData: user, transactions: transactions });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal server error." });
