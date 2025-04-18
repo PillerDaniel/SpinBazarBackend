@@ -28,7 +28,7 @@ router.post("/placebet", authMiddleware, async (req, res) => {
     wallet.balance -= betAmount;
     await wallet.save();
 
-    if (betAmount < 50) {
+    if (betAmount <= 50) {
       user.xp += 20;
     } else if (betAmount > 50 && betAmount <= 250) {
       user.xp += 50;

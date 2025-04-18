@@ -90,7 +90,6 @@ router.post(
             id: user.id,
             userName: user.userName,
             role: user.role,
-            wallet: wallet,
           },
         },
         jwtSecret,
@@ -165,7 +164,6 @@ router.post("/login", async (req, res) => {
           id: user.id,
           userName: user.userName,
           role: user.role,
-          wallet: wallet,
         },
       },
       jwtSecret,
@@ -230,7 +228,6 @@ router.post("/refresh", async (req, res) => {
         user: {
           id: decodedToken.user.id,
           userName: decodedToken.user.userName,
-          wallet: wallet,
           role: decodedToken.user.role,
         },
       },
