@@ -7,6 +7,7 @@ const config = require("config");
 const { body, validationResult } = require("express-validator");
 const cookieParser = require("cookie-parser");
 const generateUniqueWallet = require("../config/generateUniqueWallet");
+const { sendWelcomeEmail } = require("../config/nodemailer");
 
 const jwtSecret = config.get("jwtSecret");
 const refreshSecret = config.get("refreshSecret");
@@ -115,6 +116,9 @@ router.post(
         sameSite: "Strict",
         maxAge: 3 * 60 * 60 * 1000,
       });
+
+      await sendWelcomeEmail(user.email, user.userName);
+
       return res.status(201).json({
         message: "Succesful registration.",
         token: jwtData,
@@ -137,8 +141,6 @@ router.post("/login", async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "invalid credentials." });
     }
-
-    const wallet = await Wallet.findOne({ user: user._id });
 
     // check pw
     const isMatch = await bcrypt.compare(password, user.password);

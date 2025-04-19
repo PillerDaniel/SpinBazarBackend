@@ -35,7 +35,7 @@ const UserSchema = new mongoose.Schema({
   },
   xp: {
     type: Number,
-    default: 0,
+    default: 1000,
   },
   vipStatus: {
     type: String,
