@@ -2,7 +2,6 @@ const User = require("../models/User");
 const Payment = require("../models/Payment");
 const express = require("express");
 const authMiddleware = require("../middleware/authMiddleware");
-const authMiddlewareForSSE = require("../middleware/authMiddlewareForSSE");
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 
