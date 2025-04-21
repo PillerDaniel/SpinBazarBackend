@@ -18,7 +18,10 @@ router.post("/claimdaily", authMiddleware, async (req, res) => {
       (currentDate - new Date(wallet.dailyBonusClaimed)) / (1000 * 60 * 60);
 
     if (hoursSinceLastClaim < 24) {
-      return res.status(400).json({ message: "Daily bonus already claimed." });
+      return res.status(400).json({
+        message: "Daily bonus already claimed.",
+        messageHU: "Már begyüjtötte a napi bónuszt, próbálkozzon kséőbb.",
+      });
     }
 
     wallet.balance += 2;
@@ -28,10 +31,13 @@ router.post("/claimdaily", authMiddleware, async (req, res) => {
 
     return res.status(200).json({
       message: "Daily bonus claimed successfully.",
+      messageHU: "Napi bónusz sikeresen begyüjtve.",
       balance: wallet.balance,
     });
   } catch (error) {
-    return res.status(500).json({ message: "Internal server error." });
+    return res
+      .status(500)
+      .json({ message: "Internal server error.", messageHU: "Szerver hiba." });
   }
 });
 

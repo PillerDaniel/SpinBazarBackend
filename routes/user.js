@@ -18,7 +18,10 @@ router.get("/account", authMiddleware, async (req, res) => {
       .populate("wallet", "-__v");
 
     if (!user) {
-      return res.status(404).json({ message: "User not found." });
+      return res.status(404).json({
+        message: "User not found.",
+        messageHU: "Felhasználó nem található.",
+      });
     }
 
     const transactions = await Payment.find({ user: user.id })
@@ -30,7 +33,9 @@ router.get("/account", authMiddleware, async (req, res) => {
     return res.status(200).json({ userData: user, transactions: transactions });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Internal server error." });
+    return res
+      .status(500)
+      .json({ message: "Internal server error.", messageHU: "Szerver hiba." });
   }
 });
 
@@ -55,20 +60,28 @@ router.put(
       return res.status(400).json({ errors: errors.array() });
     }
     try {
-      console.log("req.body", req.body);
       const { oldPassword, newPassword, newPasswordConfirmation } = req.body;
       const user = req.user;
       if (!user) {
-        return res.status(404).json({ message: "User not found." });
+        return res.status(404).json({
+          message: "User not found.",
+          messageHU: "Felhasználó nem található.",
+        });
       }
 
       const isMatch = await bcrypt.compare(oldPassword, user.password);
 
       if (!isMatch) {
-        return res.status(401).json({ message: "Old password doesn't match." });
+        return res.status(401).json({
+          message: "Old password doesn't match.",
+          messageHU: "A régi jelszó nem egyezik.",
+        });
       }
       if (newPassword !== newPasswordConfirmation) {
-        return res.status(400).json({ message: "New passwords do not match." });
+        return res.status(400).json({
+          message: "New passwords do not match.",
+          messageHU: "Az új jelszavak nem egyeznek.",
+        });
       }
 
       const salt = await bcrypt.genSalt(10);
@@ -76,11 +89,15 @@ router.put(
 
       user.password = hashedNewPassword;
       await user.save();
-      return res
-        .status(200)
-        .json({ message: "Password changed successfully." });
+      return res.status(200).json({
+        message: "Password changed successfully.",
+        messageHU: "Sikeresen megváltoztatta jelszavát.",
+      });
     } catch (error) {
-      return res.status(500).json({ message: "Internal server error." });
+      return res.status(500).json({
+        message: "Internal server error.",
+        messageHU: "Szerver hiba.",
+      });
     }
   }
 );
@@ -100,23 +117,38 @@ router.put(
       const { newEmail, password } = req.body;
       const user = req.user;
       if (!user) {
-        return res.status(404).json({ message: "User not found." });
+        return res.status(404).json({
+          message: "User not found.",
+          messageHU: "Felhasználó nem található.",
+        });
       }
 
       if (!password) {
-        return res.status(400).json({ message: "Password is required." });
+        return res.status(400).json({
+          message: "Password is required.",
+          messageHU: "A jelszó megadása kötelező.",
+        });
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
-        return res.status(401).json({ message: "Password doesn't match." });
+        return res.status(401).json({
+          message: "Password doesn't match.",
+          messageHU: "A jelszó nem egyezik.",
+        });
       }
 
       user.email = newEmail;
       await user.save();
-      return res.status(200).json({ message: "Email changed successfully." });
+      return res.status(200).json({
+        message: "Email changed successfully.",
+        messageHU: "Sikeresen megváltoztatta az email címét.",
+      });
     } catch (error) {
-      return res.status(500).json({ message: "Internal server error." });
+      return res.status(500).json({
+        message: "Internal server error.",
+        messageHU: "Szerver hiba.",
+      });
     }
   }
 );
@@ -128,24 +160,36 @@ router.put("/deactivate", authMiddleware, async (req, res) => {
     const { password } = req.body;
 
     if (!user) {
-      return res.status(404).json({ message: "User not found." });
+      return res.status(404).json({
+        message: "User not found.",
+        messageHU: "Felhasználó nem található.",
+      });
     }
     if (!password) {
-      return res.status(400).json({ message: "Password is required." });
+      return res.status(400).json({
+        message: "Password is required.",
+        messageHU: "A jelszó megadása kötelező.",
+      });
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ message: "Password doesn't match." });
+      return res.status(401).json({
+        message: "Password doesn't match.",
+        messageHU: "A jelszó nem egyezik.",
+      });
     }
 
     user.isActive = false;
 
     await user.save();
-    return res
-      .status(200)
-      .json({ message: "Account deactivated successfully." });
+    return res.status(200).json({
+      message: "Account deactivated successfully.",
+      messageHU: "Sikeresen felfüggesztette fiókját.",
+    });
   } catch (error) {
-    return res.status(500).json({ message: "Internal server error." });
+    return res
+      .status(500)
+      .json({ message: "Internal server error.", messageHU: "Szerver hiba" });
   }
 });
 

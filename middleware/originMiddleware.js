@@ -7,9 +7,10 @@ const originMiddleware = (req, res, next) => {
     origin !== ALLOWED_ORIGIN &&
     referer?.startsWith(ALLOWED_ORIGIN) !== true
   ) {
-    return res
-      .status(403)
-      .json({ message: `Access denied: Invalid origin [${origin}]. ` });
+    return res.status(403).json({
+      message: `Access denied: Invalid origin [${origin}]. `,
+      messageHU: `Hozzáférés megtagadva: Érvénytelen kérés [${origin}]`,
+    });
   }
 
   next();

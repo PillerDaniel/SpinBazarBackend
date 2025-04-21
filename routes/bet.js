@@ -16,13 +16,18 @@ router.post("/placebet", authMiddleware, async (req, res) => {
     wallet = await Wallet.findOne({ user: user.id });
 
     if (!wallet) {
-      return res
-        .status(404)
-        .json({ message: "Wallet not found, contact support." });
+      return res.status(404).json({
+        message: "Wallet not found, contact support.",
+        messageHU:
+          "Ehhez a felhasználóhoz nem tartozik pénztárca, vegye fel a kapcsolatot az ügyfélszolgálatunkkal.",
+      });
     }
 
     if (wallet.balance < betAmount) {
-      return res.status(400).json({ message: "Insufficient balance." });
+      return res.status(400).json({
+        message: "Insufficient balance.",
+        messageHU: "Túl alacsony az egyenlege.",
+      });
     }
 
     wallet.balance -= betAmount;
@@ -40,11 +45,14 @@ router.post("/placebet", authMiddleware, async (req, res) => {
 
     return res.json({
       message: "Bet placed successfully.",
+      messageHU: "Tét sikeresen megtéve.",
       wallet: wallet,
       userXp: user.xp,
     });
   } catch (error) {
-    return res.status(500).json({ message: "Internal server error." });
+    return res
+      .status(500)
+      .json({ message: "Internal server error.", messageHU: "Szerver hiba." });
   }
 });
 
@@ -56,15 +64,23 @@ router.post("/winbet", authMiddleware, async (req, res) => {
     const userId = req.user.id;
     wallet = await Wallet.findOne({ user: userId });
     if (!wallet) {
-      return res
-        .status(404)
-        .json({ message: "Wallet not found, contact support." });
+      return res.status(404).json({
+        message: "Wallet not found, contact support.",
+        messageHU:
+          "Ehhez a felhasználóhoz nem tartozik pénztárca, vegye fel a kapcsolatot az ügyfélszolgálatunkkal.",
+      });
     }
     wallet.balance += winAmount;
     await wallet.save();
-    return res.json({ message: "Congratulations! You won!", wallet: wallet });
+    return res.json({
+      message: "Congratulations! You won!",
+      messageHU: "Gratulálunk, ön nyert.",
+      wallet: wallet,
+    });
   } catch (error) {
-    return res.status(500).json({ message: "Internal server error." });
+    return res
+      .status(500)
+      .json({ message: "Internal server error.", messageHU: "Szerver hiba." });
   }
 });
 

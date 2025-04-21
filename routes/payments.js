@@ -14,7 +14,10 @@ router.post("/deposit", authMiddleware, async (req, res) => {
     const user = req.user;
 
     if (!amount || !cardnumber || !cvv || !expireDate) {
-      return res.status(400).json({ message: "All fields are required." });
+      return res.status(400).json({
+        message: "All fields are required.",
+        messageHU: "Minden mező kitöltése kötelező.",
+      });
     }
 
     const numberValidation = cardValidator.number(cardnumber);
@@ -22,23 +25,33 @@ router.post("/deposit", authMiddleware, async (req, res) => {
     const expiryValidation = cardValidator.expirationDate(expireDate);
 
     if (!numberValidation.isValid) {
-      return res.status(400).json({ message: "Invalid card number." });
+      return res.status(400).json({
+        message: "Invalid card number.",
+        messageHU: "Érvénytelen kártyaszám.",
+      });
     }
 
     if (!cvvValidation.isValid) {
-      return res.status(400).json({ message: "Invalid CVV." });
+      return res
+        .status(400)
+        .json({ message: "Invalid CVV.", messageHU: "Érvénytelen CVV kód." });
     }
 
     if (!expiryValidation.isValid) {
-      return res.status(400).json({ message: "Invalid expiration date." });
+      return res.status(400).json({
+        message: "Invalid expiration date.",
+        messageHU: "Érvénytelen lejárati dátum.",
+      });
     }
 
     let wallet = await Wallet.findOne({ user: user.id });
 
     if (!wallet) {
-      return res
-        .status(404)
-        .json({ message: "Wallet not found, contact support." });
+      return res.status(404).json({
+        message: "Wallet not found, contact support.",
+        messageHU:
+          "Ehhez a felhasználóhoz nem tartozik pénztárca, vegye fel a kapcsolatot az ügyfélszolgálatunkkal.",
+      });
     }
 
     wallet.balance += amount;
@@ -55,9 +68,15 @@ router.post("/deposit", authMiddleware, async (req, res) => {
 
     await payment.save();
 
-    return res.json({ message: "Deposit successful.", wallet });
+    return res.json({
+      message: "Deposit successful.",
+      messageHU: "Sikeres befizetés.",
+      wallet,
+    });
   } catch (error) {
-    return res.status(500).json({ message: "Internal server error." });
+    return res
+      .status(500)
+      .json({ message: "Internal server error.", messageHU: "Szerver hiba." });
   }
 });
 
@@ -69,19 +88,27 @@ router.post("/withdraw", authMiddleware, async (req, res) => {
     const user = req.user;
 
     if (!amount) {
-      return res.status(400).json({ message: "Fields are required." });
+      return res.status(400).json({
+        message: "Fields are required.",
+        messageHU: "Minden mező kitöltése kötelező.",
+      });
     }
 
     let wallet = await Wallet.findOne({ user: user.id });
 
     if (!wallet) {
-      return res
-        .status(404)
-        .json({ message: "Wallet not found, contact support." });
+      return res.status(404).json({
+        message: "Wallet not found, contact support.",
+        messageHU:
+          "Ehhez a felhasználóhoz nem tartozik pénztárca, vegye fel a kapcsolatot az ügyfélszolgálatunkkal.",
+      });
     }
 
     if (wallet.balance < amount) {
-      return res.status(400).json({ message: "Insufficient balance." });
+      return res.status(400).json({
+        message: "Insufficient balance.",
+        messageHU: "Túl alacsony az egyenlege.",
+      });
     }
 
     wallet.balance -= amount;
@@ -98,9 +125,15 @@ router.post("/withdraw", authMiddleware, async (req, res) => {
 
     await payment.save();
 
-    return res.json({ message: "Withdrawal successful.", wallet });
+    return res.json({
+      message: "Withdrawal successful.",
+      messageHU: "Sikeres kifizetés.",
+      wallet,
+    });
   } catch (error) {
-    return res.status(500).json({ message: "Internal server error." });
+    return res
+      .status(500)
+      .json({ message: "Internal server error.", messageHU: "Szerver hiba." });
   }
 });
 

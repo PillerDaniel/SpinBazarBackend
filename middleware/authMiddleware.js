@@ -8,16 +8,20 @@ const authMiddleware = async (req, res, next) => {
 
   //if no token provided
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res
-      .status(401)
-      .json({ message: "Access denied. No token provided." });
+    return res.status(401).json({
+      message: "Access denied. No token provided.",
+      messageHU: "Hozzáférés megtagadva. Nincs megadva token.",
+    });
   }
 
   const token = authHeader.split(" ")[1];
 
   jwt.verify(token, jwtSecret, async (err, decodedToken) => {
     if (err) {
-      return res.status(401).json({ message: "Invalid token." });
+      return res.status(401).json({
+        message: "Acces denied. Invalid token.",
+        messageHU: "Hozzáférés megtagadva. Érvénytelen token.",
+      });
     }
 
     try {
@@ -29,13 +33,19 @@ const authMiddleware = async (req, res, next) => {
       if (user.isActive === false) {
         return res.status(403).json({
           message: "Your account has been suspended, contact support.",
+          messageHU:
+            "A fiókod felfüggesztésre került, lépj kapcsolatba az ügyfélszolgálatunkkal.",
         });
       }
 
       next();
     } catch (error) {
-      console.error("Auth error:", error);
-      return res.status(500).json({ message: "Internal server error." });
+      return res
+        .status(500)
+        .json({
+          message: "Internal server error.",
+          messageHU: "Szerver hiba.",
+        });
     }
   });
 };

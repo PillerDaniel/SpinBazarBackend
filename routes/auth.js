@@ -49,13 +49,17 @@ router.post(
         $or: [{ email }, { userName }],
       });
       if (existingUser) {
-        return res
-          .status(400)
-          .json({ message: "Username or Email already in use." });
+        return res.status(400).json({
+          message: "Username or Email already in use.",
+          messageHU: "Felhasználónév vagy email már használatban van.",
+        });
       }
 
       if (password !== passwordConfirmation) {
-        return res.status(400).json({ message: "Passwords do not match." });
+        return res.status(400).json({
+          message: "Passwords do not match.",
+          messageHU: "A megadott jelszavak nem egyeznek.",
+        });
       }
 
       const age = Math.abs(
@@ -64,9 +68,10 @@ router.post(
       );
       //age check
       if (age < 18) {
-        return res
-          .status(400)
-          .json({ message: "You must be at least 18 years old to register." });
+        return res.status(400).json({
+          message: "You must be at least 18 years old to register.",
+          messageHU: "A szolgáltatás csak 18 éven felüliek számára érhető el.",
+        });
       }
 
       // pw hash
@@ -121,10 +126,14 @@ router.post(
 
       return res.status(201).json({
         message: "Succesful registration.",
+        messageHU: "Sikeres regisztráció.",
         token: jwtData,
       });
     } catch (err) {
-      return res.status(500).json({ message: "Internal server error." });
+      return res.status(500).json({
+        message: "Internal server error.",
+        messageHU: "Szerver hiba.",
+      });
     }
   }
 );
@@ -139,7 +148,10 @@ router.post("/login", async (req, res) => {
     const user = await User.findOne({ userName });
 
     if (!user) {
-      return res.status(404).json({ message: "invalid credentials." });
+      return res.status(404).json({
+        message: "Invalid credentials.",
+        messageHU: "A megadott adatokkal nem található felhasználó.",
+      });
     }
 
     // check pw
@@ -147,12 +159,16 @@ router.post("/login", async (req, res) => {
 
     //if pw doesn't match
     if (!isMatch) {
-      return res.status(401).json({ message: "Invalid credentials." });
+      return res
+        .status(400)
+        .json({ message: "Invalid password.", messageHU: "Hibás jelszó." });
     }
 
     if (user.isActive === false) {
       return res.status(401).json({
         message: "Your account is suspended, contact with our support.",
+        messageHU:
+          "Fiókját felfüggesztettük, kérjük vegye fel a kapcsolatot az ügyfélszolgálatunkkal.",
       });
     }
 
@@ -194,10 +210,13 @@ router.post("/login", async (req, res) => {
 
     return res.status(200).json({
       message: "Logged in successfully.",
+      messageHU: "Sikeres bejelentkezés.",
       token: jwtData,
     });
   } catch (err) {
-    return res.status(500).json({ message: "Internal server error." });
+    return res
+      .status(500)
+      .json({ message: "Internal server error.", messageHU: "Szerver hiba." });
   }
 });
 
@@ -206,18 +225,25 @@ router.post("/login", async (req, res) => {
 router.post("/refresh", async (req, res) => {
   const oldRefreshToken = req.cookies.refreshToken;
   if (!oldRefreshToken) {
-    return res.status(401).json({ message: "No refresh token provided." });
+    return res.status(401).json({
+      message: "No refresh token provided.",
+      messageHU: "Nincs megadva refresh token.",
+    });
   }
 
   if (!activeRefreshTokens.has(oldRefreshToken)) {
-    return res
-      .status(403)
-      .json({ message: "Token has been already used or expired." });
+    return res.status(403).json({
+      message: "Token has been already used or expired.",
+      messageHU: "A tokent felhasználták, vagy lejárt.",
+    });
   }
 
   jwt.verify(oldRefreshToken, refreshSecret, (err, decodedToken) => {
     if (err) {
-      return res.status(403).json({ message: "Invalid or expired token." });
+      return res.status(403).json({
+        message: "Invalid or expired token.",
+        messageHU: "Érvénytelen, vagy lejárt token.",
+      });
     }
 
     res.clearCookie("refreshToken");
@@ -274,7 +300,10 @@ router.post("/logout", async (req, res) => {
   if (refreshToken) {
     activeRefreshTokens.delete(refreshToken);
     res.clearCookie("refreshToken");
-    return res.status(200).json({ message: "Logged out successfully." });
+    return res.status(200).json({
+      message: "Logged out successfully.",
+      messageHU: "Sikeres kijelentkezés.",
+    });
   }
 });
 

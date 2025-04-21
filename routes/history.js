@@ -19,9 +19,14 @@ router.post("/addhistory", authMiddleware, async (req, res) => {
 
     await history.save();
 
-    return res.json({ message: "History added." });
+    return res.json({
+      message: "History added.",
+      messageHU: "Elözmény hozzáadva.",
+    });
   } catch (error) {
-    return res.status(500).json({ message: "interal server error" });
+    return res
+      .status(500)
+      .json({ message: "Interal server error.", messageHU: "Szerver hiba." });
   }
 });
 
@@ -39,7 +44,9 @@ router.get("/gethistory", authMiddleware, async (req, res) => {
     const history = await History.find({ user: userId, game: game });
     return res.status(200).json({ history: history });
   } catch (error) {
-    return res.status(500).json({ message: "Internal server error." });
+    return res
+      .status(500)
+      .json({ message: "Internal server error.", messageHU: "Szerver hiba." });
   }
 });
 
