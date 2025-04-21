@@ -20,7 +20,7 @@ router.post("/claimdaily", authMiddleware, async (req, res) => {
     if (hoursSinceLastClaim < 24) {
       return res.status(400).json({
         message: "Daily bonus already claimed.",
-        messageHU: "Már begyüjtötte a napi bónuszt, próbálkozzon kséőbb.",
+        messageHU: "Már begyüjtötte a napi bónuszt, próbálkozzon később.",
       });
     }
 
