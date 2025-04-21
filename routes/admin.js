@@ -2,6 +2,7 @@ const History = require("../models/History");
 const User = require("../models/User");
 const adminMiddleware = require("../middleware/adminMiddleware");
 const express = require("express");
+const Payment = require("../models/Payment");
 const router = express.Router();
 
 //get users
@@ -153,6 +154,30 @@ router.put("/edituser/:id", adminMiddleware, async (req, res) => {
       message: "User updated successfully.",
       messageHU: "A felhasználó sikeresen frissítve.",
     });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Internal server error.", messageHU: "Szerver hiba." });
+  }
+});
+
+router.get("/userprofile/:id", adminMiddleware, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await User.findById(userId).select("-password -__v");
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found.",
+        messageHU: "Felhasználó nem található.",
+      });
+    }
+
+    const histories = await History.find({ user: userId }).select("-__v");
+    const transactions = await Payment.find({ user: userId }).select("-__v");
+
+    return res
+      .status(200)
+      .json({ user: user, histories: histories, transactions: transactions });
   } catch (error) {
     return res
       .status(500)
