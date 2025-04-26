@@ -186,7 +186,7 @@ router.post("/login", async (req, res) => {
       },
       jwtSecret,
       {
-        expiresIn: 3600,
+        expiresIn: "30m",
       }
     );
 
@@ -195,7 +195,7 @@ router.post("/login", async (req, res) => {
       { user: { id: user.id, userName: user.userName, role: user.role } },
       refreshSecret,
       {
-        expiresIn: 10800,
+        expiresIn: "7d",
       }
     );
 
@@ -249,19 +249,18 @@ router.post("/refresh", async (req, res) => {
     res.clearCookie("refreshToken");
     activeRefreshTokens.delete(oldRefreshToken);
 
-    const wallet = Wallet.findOne({ user: decodedToken.user.id });
-
     const newAccesToken = jwt.sign(
       {
         user: {
           id: decodedToken.user.id,
           userName: decodedToken.user.userName,
           role: decodedToken.user.role,
+          refresh: true,
         },
       },
       jwtSecret,
       {
-        expiresIn: 1800,
+        expiresIn: "30m",
       }
     );
 
@@ -275,7 +274,7 @@ router.post("/refresh", async (req, res) => {
       },
       refreshSecret,
       {
-        expiresIn: 10800,
+        expiresIn: "7d",
       }
     );
 
