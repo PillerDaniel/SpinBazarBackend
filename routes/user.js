@@ -31,7 +31,6 @@ router.get("/account", authMiddleware, async (req, res) => {
 
     return res.status(200).json({ userData: user, transactions: transactions });
   } catch (error) {
-    console.error(error);
     return res
       .status(500)
       .json({ message: "Internal server error.", messageHU: "Szerver hiba." });
